@@ -1,8 +1,17 @@
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
 import getWeb3 from "./getWeb3";
+import { 
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+} from "react-router-dom"
 
 import "./App.css";
+import Login from "./components/Login"
+import Passenger from "./components/Passenger";
+import Driver from "./components/Driver";
 
 class App extends Component {
   state = { storageValue: 0, web3: null, accounts: null, contract: null };
@@ -54,20 +63,62 @@ class App extends Component {
     }
     return (
       <div className="App">
-        <h1>Good to Go!</h1>
-        <p>Your Truffle Box is installed and ready.</p>
-        <h2>Smart Contract Example</h2>
-        <p>
-          If your contracts compiled and migrated successfully, below will show
-          a stored value of 5 (by default).
-        </p>
-        <p>
-          Try changing the value stored on <strong>line 42</strong> of App.js.
-        </p>
-        <div>The stored value is: {this.state.storageValue}</div>
+        <Router>
+          <div className="admin-panel">
+            <ul>
+              <li>
+                <Link to="/login">Login</Link>
+              </li>
+              <li>
+                <Link to="/passenger">Passenger</Link>
+              </li>
+              <li>
+                <Link to="/driver">Driver</Link>
+              </li>
+            </ul>
+          </div>
+          <Switch>
+            <Route exact path="/">
+              <App />
+            </Route>
+            <Route path="/login">
+              <Login />
+            </Route>
+            <Route exact path="/passenger">
+              <Passenger />
+            </Route>
+            <Route exact path="/driver">
+              <Driver />
+            </Route>
+          </Switch>
+        </Router>
       </div>
     );
   }
 }
 
 export default App;
+
+  {/* <div className="main">
+    <img></img>
+    <h1 className="main-header">Denoriel</h1>
+    <h1> username </h1>
+    <input placeholder="username"></input>
+    <h1> password </h1>
+    <input placeholder="password"></input>
+    <div>
+      <button>Login</button>
+    </div>
+  </div> */}
+
+  {/* <h1>Good to Go!</h1>
+  <p>Your Truffle Box is installed and ready.</p>
+  <h2>Smart Contract Example</h2>
+  <p>
+    If your contracts compiled and migrated successfully, below will show
+    a stored value of 5 (by default).
+  </p>
+  <p>
+    Try changing the value stored on <strong>line 42</strong> of App.js.
+  </p>
+  <div>The stored value is: {this.state.storageValue}</div> */}

@@ -1,0 +1,33 @@
+@import "../App.css";
+
+.passenger-main {
+  display: flex;
+  position: relative;
+  flex: 1;
+  flex-direction: row;
+  justify-content: center;
+}
+
+.location-marker {
+  position: absolute;
+  left: 0;
+  width: 30px;
+  height: 70px;
+}
+
+.location-container {
+  display:flex;
+  flex-direction: column;
+}
+
+.location-container__input {
+  width: 275px;
+  height: 25px;
+  margin: 3px 0px 3px 0px;
+}
+
+.location-container__plus {
+  position: absolute;
+  right: 10px;
+  top: 10px;
+}
