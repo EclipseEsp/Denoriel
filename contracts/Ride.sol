@@ -40,14 +40,16 @@ contract Ride {
         Driversinfo[driveraddress].location_x = xlocation;
         Driversinfo[driveraddress].location_y = ylocation;
         return Drivers;
+        // return Driversinfo[0xaBA2eAB6A94977e2c571CD0371BB25Bfda16b978].location_x;
     }
 
 
-    function removeDriver(address driveraddress) public {
+    function removeDriver(address driveraddress) public returns (address[] memory) {
         for (uint i=0; i<Drivers.length; i++) {
             if (driveraddress==Drivers[i]) {
                 delete Drivers[i];
                 break;
+                return Drivers;
             }
         }
     }
@@ -58,20 +60,24 @@ contract Ride {
         bestMatch = Drivers[0];
         // bestMatch = 0x5DE55C28154Ab371Fada8307400603bD2D803810;
         for (uint i=0; i<Drivers.length; i++) {
-            if (((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2)<minDistance){
-                minDistance = ((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2);
-                bestMatch = Drivers[i];
-                RideMatch[passenger].drivers = bestMatch;
+            if(Drivers[i] != 0x0000000000000000000000000000000000000000) {
+                if (((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2)<minDistance){
+                    minDistance = ((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2);
+                    bestMatch = Drivers[i];
+                    RideMatch[passenger].drivers = bestMatch;
+                }
             }
         }
         return bestMatch;
     }
     
+    // from here onwards doesnt work
     // called by driver
-    function accept(address passenger, uint256 amount) public{
+    function accept(address passenger, uint256 amount) public returns(uint256){
         if (msg.sender == RideMatch[passenger].drivers){
             // pay the escrow
             escrowDict[msg.sender].amount += amount;
+            return escrowDict[msg.sender].amount;
         }
     }
 
