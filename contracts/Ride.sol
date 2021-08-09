@@ -6,6 +6,8 @@ pragma solidity >=0.4.21 <0.7.0;
 contract Ride {
     
     uint256 escrowBalance;
+    bool lock = false;
+    uint256 payAmount;
     address payable passenger;
     address[] public Drivers; // All the addresses of drivers
     address public bestMatch;
@@ -64,17 +66,21 @@ contract Ride {
                 if (((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2)<minDistance){
                     minDistance = ((Driversinfo[Drivers[i]].location_x -passenger_locationx )**2 + (Driversinfo[Drivers[i]].location_y -passenger_locationy )**2);
                     bestMatch = Drivers[i];
-                    RideMatch[passenger].drivers = bestMatch;
+                    DriversAddress memory dAdd = DriversAddress(bestMatch);
+                    // RideMatch[passenger].drivers = bestMatch;
+                    RideMatch[passenger] = dAdd;
                 }
             }
         }
         return bestMatch;
+        // return RideMatch[passenger].drivers;
     }
     
-    // from here onwards doesnt work
     // called by driver
     function accept(address passenger, uint256 amount) public returns(uint256){
+        // return RideMatch[passenger].drivers;
         if (msg.sender == RideMatch[passenger].drivers){
+            DriverAccDict[msg.sender].driverAccept=true;
             // pay the escrow
             escrowDict[msg.sender].amount += amount;
             return escrowDict[msg.sender].amount;
@@ -82,27 +88,51 @@ contract Ride {
     }
 
     // passenger accepts finish state first before driver
-    function passengerFinished(address passenger) public {
+    function passengerFinished(address passenger) public returns(bool) {
         passengerAccDict[passenger].passengerAccept=true;
+        return passengerAccDict[passenger].passengerAccept;
     }
 
     // driver accepts finish state after passenger 
-    function driverFinished(address payable driver) public {
-        if (DriverAccDict[driver].driverAccept && passengerAccDict[msg.sender].passengerAccept){
+    function driverFinished(address passenger, address payable driver) public returns(uint256) {
+        require(!lock);
+        lock = true;
+        if (DriverAccDict[msg.sender].driverAccept && passengerAccDict[passenger].passengerAccept){
+            // return escrowDict[msg.sender].amount;
             driver.transfer(escrowDict[msg.sender].amount);
             escrowDict[msg.sender].amount = 0; // can only entertain one passenger at a time
+            lock = false;
+            return escrowDict[msg.sender].amount;
         }
     }
 
-    function driverCancel() public {
+    function driverCancel(address payable passenger) public returns(uint256) {
         //driver cancelling
+        DriverAccDict[msg.sender].driverAccept=false;
+        // if(escrowDict[msg.sender].amount != 0) {
+        //     payAmount = escrowDict[msg.sender].amount;
+        //     escrowDict[msg.sender].amount = 0;
+        //     passenger.transfer(payAmount);
+        //     payAmount = 0;
+        // }
+        require(!lock);
+        lock = true;
         DriverAccDict[msg.sender].driverAccept=false;
         if(escrowDict[msg.sender].amount != 0) {
             escrowDict[msg.sender].amount = 0;
+            passenger.transfer(escrowDict[msg.sender].amount);
         }
+        lock = false;
+        return escrowDict[msg.sender].amount;
     }
-    function passengerCancel() public {
-        passengerAccDict[msg.sender].passengerAccept =false;      
+    
+    function passengerCancel(address payable passenger) public returns(uint256) {
+        require(!lock);
+        lock = true;
+        passengerAccDict[msg.sender].passengerAccept = false;
+        passenger.transfer(escrowDict[RideMatch[msg.sender].drivers].amount);
         escrowDict[RideMatch[msg.sender].drivers].amount = 0;
+        lock = false;
+        return escrowDict[RideMatch[msg.sender].drivers].amount;
     }
 }
