@@ -1,5 +1,6 @@
 import React, { Component } from "react";
 import SimpleStorageContract from "./contracts/SimpleStorage.json";
+import RideContract from "./contracts/Ride.json";
 import getWeb3 from "./getWeb3";
 import { 
   BrowserRouter as Router,
