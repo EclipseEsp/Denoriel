@@ -1,5 +1,10 @@
 .App {
+  display:flex;
+  flex-direction: column  ;
   text-align: center;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
 }
 
 .App-logo {
@@ -20,3 +25,51 @@
 .App-link {
   color: #09d3ac;
 }
+
+.admin-panel {
+  margin-right: 20px;
+}
+
+.main{
+  display: flex;
+  position: relative;
+  flex-direction: column;
+  min-width: 375px;
+  min-height: 667px;
+  border-style: solid;
+  border-color: black;
+  border-width: 2px;
+  padding: 10px;
+}
+
+.main-header{
+  font-size: 3.5rem;
+}
+
+.main-image{
+  max-width: 375px;
+  padding: 50px 0px;
+}
+
+.red-border{
+  border: 2px solid red;
+}
+
+.nav-bar{
+  display: flex;
+  flex-direction: row;
+}
+
+.nav-bar__center{
+  position: relative;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.nav-bar-arrow{ 
+  position: absolute;
+  left: 0;
+  text-decoration: none;
+}
+
