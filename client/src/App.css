@@ -46,6 +46,11 @@
   font-size: 3.5rem;
 }
 
+.main-image{
+  max-width: 375px;
+  padding: 50px 0px;
+}
+
 .red-border{
   border: 2px solid red;
 }

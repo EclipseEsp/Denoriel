@@ -7,12 +7,13 @@ import {
   Route,
   Link,
 } from "react-router-dom";
+import Denoriel from "../assets/Denoriel.jpg";
 
 const Login = () =>{
   return(
     <div className="main">
-      <img></img>
-        <h1 className="main-header">Denoriel</h1>
+      <img src={Denoriel} className="main-image"></img>
+        {/* <h1 className="main-header">Denoriel</h1> */}
         <h1> username </h1>
         <input placeholder="username"></input>
         <h1> password </h1>

@@ -6,15 +6,22 @@ import taxi from "../assets/taxi.png";
 import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import GoogleMapReact from "google-map-react";
 import axios from "axios";
+import RideContract from "../contracts/Ride.json";
+import getWeb3 from "../getWeb3";
+import Web3 from "web3";
 
 const API_KEY = "AIzaSyAuZoQ3lT4ixjYFtzRtqpydhvOM6bCG-vQ";
 
 const Passenger = () => {
   // Singapore 1.3521° N, 103.8198° E
+  const [state, setState] = useState({ web3: null, accounts: null, contract: null })
   const [center, setCenter] = useState({ lat: 1.3521, lng: 103.8198 });
   const [zoom, setZoom] = useState(12);
   const [destination, setDestination] = useState("");
   const [destinationLatLng, setDestinationLatLng] = useState({});
+  const [web3, setWeb3] = useState(null)
+  const [accounts, setAccounts] = useState(null);
+  const [contract, setContract] = useState(null);
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -35,20 +42,55 @@ const Passenger = () => {
     }
   }, [center]);
 
-  // useEffect(() => {
-  //   console.log("destination");
-  //   console.log(destination);
-  // }, [destination]);
+  useEffect(()=>{
+    console.log("Passenger's useEffect")
+    const init = async () => {
+      const web3 = new Web3(window.ethereum);
+      const accounts = await getAccounts(web3);
+      const contract = await getContract(web3);
+    }
+    init();
+  },[])
 
-  const handleSubmit = () => {
-    axios
-      .get(
-        `https://maps.googleapis.com/maps/api/geocode/json?components=country:SG|postal_code:${destination}&key=${API_KEY}`
-      )
-      .then((response) => console.log(response))
-      .catch((error) => console.log(error));
+  const getAccounts = async(web3) => {
+    const accounts = await web3.eth.getAccounts()
+    console.log("ACCOUNTS")
+    console.log(accounts)
+    return accounts;
+  }
+  const getContract = async(web3) => {
+    // Get the contract instance.
+    const networkId = await web3.eth.net.getId();
+    const deployedNetwork = RideContract.networks[networkId];
+    const instance = new web3.eth.Contract(
+      RideContract.abi,
+      deployedNetwork && deployedNetwork.address,
+    );
+    console.log("INSTANCE")
+    console.log(instance)
+    return instance
+  }
+
+
+  const handleSubmit = async(e) => {
+    e.preventDefault();
     console.log("Form Submitted");
     console.log(destination);
+    // axios
+    //   .get(
+    //     `https://maps.googleapis.com/maps/api/geocode/json?components=country:SG|postal_code:${destination}&key=${API_KEY}`
+    //   )
+    //   .then((response) => console.log(response))
+    //   .catch((error) => console.log(error));
+    // match_rides();
+    // const accounts = await web3.eth.getAccounts();
+    const web3 = new Web3(window.ethereum);
+    console.log(web3)
+    const accounts = await getAccounts(web3);
+    const contract = await getContract(web3);
+    const bestmatch = await contract.methods.match_rides(accounts[0],25,25).send({ from: accounts[0] });
+    console.log("best match")
+    console.log(bestmatch);
   };
 
   return (
@@ -73,6 +115,11 @@ const Passenger = () => {
               value={destination}
               placeholder="Destination"
               onChange={(event) => setDestination(event.target.value)}
+            ></input>
+             <input
+              className="location-container__input"
+              value="0.00010"
+              placeholder="Price"
             ></input>
             <div className="location-container__plus">
               <button type="submit" onClick={handleSubmit}>

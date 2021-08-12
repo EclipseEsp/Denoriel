@@ -13,6 +13,7 @@ import "./App.css";
 import Login from "./components/Login"
 import Passenger from "./components/Passenger";
 import Driver from "./components/Driver";
+import Confirmation from "./components/Confirmation"
 
 class App extends Component {
   state = { storageValue: 0, web3: null, accounts: null, contract: null };
@@ -24,18 +25,20 @@ class App extends Component {
 
       // Use web3 to get the user's accounts.
       const accounts = await web3.eth.getAccounts();
-
+      
       // Get the contract instance.
       const networkId = await web3.eth.net.getId();
-      const deployedNetwork = SimpleStorageContract.networks[networkId];
+      const deployedNetwork = RideContract.networks[networkId];
       const instance = new web3.eth.Contract(
-        SimpleStorageContract.abi,
+        RideContract.abi,
         deployedNetwork && deployedNetwork.address,
       );
+      console.log(accounts)
+      console.log(instance)
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      this.setState({ web3, accounts, contract: instance });
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -45,20 +48,28 @@ class App extends Component {
     }
   };
 
+
   runExample = async () => {
     const { accounts, contract } = this.state;
+    
+    // // Stores a given value, 5 by default.
+    // await contract.methods.set(5).send({ from: accounts[0] });
+    await contract.methods.match_rides(accounts[0],25,25).send({ from: accounts[0] });
 
-    // Stores a given value, 5 by default.
-    await contract.methods.set(5).send({ from: accounts[0] });
+    // // Get the value from the contract to prove it worked.
+    // const response = await contract.methods.get().call();
 
-    // Get the value from the contract to prove it worked.
-    const response = await contract.methods.get().call();
-
-    // Update state with the result.
-    this.setState({ storageValue: response });
+    // // Update state with the result.
+    // this.setState({ storageValue: response });
   };
 
+
   render() {
+    // const addDriver = async function () {
+    //   const { accounts, contract } = this.state;
+    //   await contract.methods.addDriver(accounts[0],50,50).send({ from: accounts[0] });
+    // }
+
     if (!this.state.web3) {
       return <div>Loading Web3, accounts, and contract...</div>;
     }
@@ -76,6 +87,9 @@ class App extends Component {
               <li>
                 <Link to="/driver">Driver</Link>
               </li>
+              <li>
+                <Link to="/confirmation">Confirmation</Link>
+              </li>
             </ul>
           </div>
           <Switch>
@@ -90,6 +104,9 @@ class App extends Component {
             </Route>
             <Route exact path="/driver">
               <Driver />
+            </Route>
+            <Route exact path="/confirmation">
+              <Confirmation />
             </Route>
           </Switch>
         </Router>

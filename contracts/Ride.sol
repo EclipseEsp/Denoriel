@@ -1,7 +1,7 @@
 // ethereum remix
 // pragma solidity >=0.7.0 <0.9.0;
 // VS code
-pragma solidity >=0.4.21 <0.7.0;
+pragma solidity >=0.7.0 <0.9.0;
 
 contract Ride {
     
@@ -18,6 +18,8 @@ contract Ride {
     uint256 minDistance;
     mapping (address => driverAccept) private DriverAccDict;
     mapping (address => passengerAccept) private passengerAccDict;
+    mapping (address => MapToPassenger) private DriverToPassenger;
+
 
     struct DriverInfo {
         uint location_x;
@@ -35,6 +37,10 @@ contract Ride {
 
     struct passengerAccept{
         bool passengerAccept; // Set to true at the end of the journey
+    }
+
+    struct MapToPassenger{
+        address drivers;
     }
 
     function addDriver(address driveraddress, uint256 xlocation, uint256 ylocation) public returns(address[] memory) {
@@ -56,6 +62,10 @@ contract Ride {
         }
     }
     
+    function getPassengerList() public view returns (uint[] memory) {
+        return passenger_list;
+    }
+
     function match_rides(address passenger, uint256 passenger_locationx, uint256 passenger_locationy) public returns(address) {
         //match passenger to driver
         minDistance = 1000;
@@ -72,6 +82,7 @@ contract Ride {
                 }
             }
         }
+        DriverToPassenger[bestMatch].drivers = passenger;
         return bestMatch;
         // return RideMatch[passenger].drivers;
     }
@@ -134,5 +145,9 @@ contract Ride {
         escrowDict[RideMatch[msg.sender].drivers].amount = 0;
         lock = false;
         return escrowDict[RideMatch[msg.sender].drivers].amount;
+    }
+
+    function getBestMatch(address driver) public view returns (address){
+        return DriverToPassenger[driver].drivers;
     }
 }
